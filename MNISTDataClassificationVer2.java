@@ -18,6 +18,7 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -106,39 +107,41 @@ public class MNISTDataClassificationVer2 {
             model.fit(dataIter);
         }
 
-        log.info("******EVALUATE MODEL******");
+//        log.info("******EVALUATE MODEL******");
+//
+//        recordReader.reset();
+//
+//        recordReader.initialize(test);
+//        DataSetIterator testIter = new RecordReaderDataSetIterator(recordReader,batchSize,1,outputNum);
+//        scaler.fit(testIter);
+//        testIter.setPreProcessor(scaler);
+//
+//        log.info(recordReader.getLabels().toString());
+//
+//        // Create Eval object with 10 possible classes
+//        Evaluation eval = new Evaluation(outputNum);
+//
+//        // Evaluate the network
+//        while(testIter.hasNext()){
+//            DataSet next = testIter.next();
+//            INDArray output = model.output(next.getFeatureMatrix());
+//            // Compare the Feature Matrix from the model
+//            // with the labels from the RecordReader
+//            eval.eval(next.getLabels(),output);
+//
+//        }
+//        log.info(eval.stats());
 
-        recordReader.reset();
+        log.info("********Save model********");
+        File locationToSave = new File("trained_mnist_model.zip");
 
-        recordReader.initialize(test);
-        DataSetIterator testIter = new RecordReaderDataSetIterator(recordReader,batchSize,1,outputNum);
-        scaler.fit(testIter);
-        testIter.setPreProcessor(scaler);
+        // boolean save Updater
+        boolean saveUpdater = false;
 
-        log.info(recordReader.getLabels().toString());
+        // ModelSerializer needs modelname, saveUpdater, Location
 
-        // Create Eval object with 10 possible classes
-        Evaluation eval = new Evaluation(outputNum);
-
-
-        // Evaluate the network
-        while(testIter.hasNext()){
-            DataSet next = testIter.next();
-            INDArray output = model.output(next.getFeatureMatrix());
-            // Compare the Feature Matrix from the model
-            // with the labels from the RecordReader
-            eval.eval(next.getLabels(),output);
-
-        }
-
-        log.info(eval.stats());
-
+        ModelSerializer.writeModel(model,locationToSave,saveUpdater);
 
     }
-
-
-
-
-
 
 }
