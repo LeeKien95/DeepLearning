@@ -1,15 +1,15 @@
 package GR;
 
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
+//import org.apache.spark.SparkConf;
+//import org.apache.spark.api.java.JavaRDD;
+//import org.apache.spark.api.java.JavaSparkContext;
 import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.Writable;
-import org.datavec.spark.transform.SparkTransformExecutor;
-import org.datavec.spark.transform.misc.StringToWritablesFunction;
-import org.datavec.spark.transform.misc.WritablesToStringFunction;
+//import org.datavec.spark.transform.SparkTransformExecutor;
+//import org.datavec.spark.transform.misc.StringToWritablesFunction;
+//import org.datavec.spark.transform.misc.WritablesToStringFunction;
 
 import java.util.Date;
 import java.util.List;
@@ -72,26 +72,26 @@ public class StormReportsRecordReader {
             System.out.println(tp.getSchemaAfterStep(i));
         }
 
-        SparkConf sparkConf = new SparkConf();
-        sparkConf.setMaster("local[*]");
-        sparkConf.setAppName("Storm Reports Record Reader Transform");
-        JavaSparkContext sc = new JavaSparkContext(sparkConf);
-        /**
-         * Get our data into a spark RDD
-         * and transform that spark RDD using our
-         * transform process
-         */
-
-        // read the data file
-        JavaRDD<String> lines = sc.textFile(inputPath);
-        // convert to Writable
-        JavaRDD<List<Writable>> stormReports = lines.map(new StringToWritablesFunction(new CSVRecordReader()));
-        // run our transform process
-        JavaRDD<List<Writable>> processed = SparkTransformExecutor.execute(stormReports,tp);
-        // convert Writable back to string for export
-        JavaRDD<String> toSave = processed.map(new WritablesToStringFunction(","));
-
-        toSave.saveAsTextFile(outputPath);
+//        SparkConf sparkConf = new SparkConf();
+//        sparkConf.setMaster("local[*]");
+//        sparkConf.setAppName("Storm Reports Record Reader Transform");
+//        JavaSparkContext sc = new JavaSparkContext(sparkConf);
+//        /**
+//         * Get our data into a spark RDD
+//         * and transform that spark RDD using our
+//         * transform process
+//         */
+//
+//        // read the data file
+//        JavaRDD<String> lines = sc.textFile(inputPath);
+//        // convert to Writable
+//        JavaRDD<List<Writable>> stormReports = lines.map(new StringToWritablesFunction(new CSVRecordReader()));
+//        // run our transform process
+//        JavaRDD<List<Writable>> processed = SparkTransformExecutor.execute(stormReports,tp);
+//        // convert Writable back to string for export
+//        JavaRDD<String> toSave = processed.map(new WritablesToStringFunction(","));
+//
+//        toSave.saveAsTextFile(outputPath);
 
     }
 

@@ -1,7 +1,6 @@
 package GR;
 
 
-import org.apache.commons.io.FilenameUtils;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
 import org.datavec.api.split.FileSplit;
 import org.datavec.image.loader.NativeImageLoader;
@@ -18,7 +17,6 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -40,9 +38,10 @@ import java.util.Random;
 public class MNISTDataClassificationVer2 {
 //    public static final String DATA_PATH = FilenameUtils.concat(System.getProperty("java.io.tmpdir"), "dl4j_Mnist/");
 
-    private static Logger log = LoggerFactory.getLogger(MNISTDataClassificationVer2.class);
+    private static Logger log = LoggerFactory.getLogger(MNISTDataClassificationVer2.class.getName());
 
     public static void main(String[] args) throws IOException {
+//        log.warn("Hello World");
         int height = 28;
         int width = 28;
         int chanel = 1;
@@ -71,76 +70,76 @@ public class MNISTDataClassificationVer2 {
         dataIter.setPreProcessor(scaler);
 
 
-        log.info("**********Build Model**********");
+        log.error("**********Build Model**********");
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-            .seed(rngSeed)
+            .seed(rngSeed) //include a random seed for reproducibility
             .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
             .iterations(1)
-            .learningRate(0.006)
-            .updater(Updater.NESTEROVS).momentum(0.9)   //momentum is for stop learningRate/weights from exploring or vanishing? or just keep weight descent in correct direction?
+            .learningRate(0.01)
+            .updater(Updater.NESTEROVS).momentum(0.9)
             .regularization(true).l2(1e-4)
             .list()
-            .layer(0, new DenseLayer.Builder()
+        /*Building Layers*/
+            .layer(0, new DenseLayer.Builder() // input layer
                 .nIn(height * width)
-                .nOut(100)
+                .nOut(1000)
                 .activation(Activation.RELU)
                 .weightInit(WeightInit.XAVIER)
                 .build())
-            .layer(1, new OutputLayer.Builder()
-                .nIn(100)
+            .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                .nIn(1000)
                 .nOut(outputNum)
                 .activation(Activation.SOFTMAX)
-                .lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
                 .weightInit(WeightInit.XAVIER)
                 .build())
-            .pretrain(false).backprop(true)
-            .setInputType(InputType.convolutional(height, width, chanel))
+            .pretrain(false).backprop(true) //use backpropagation to adjust weights
             .build();
 
         MultiLayerNetwork model = new MultiLayerNetwork(conf);
 
         model.setListeners(new ScoreIterationListener(10));
 
-        log.info("*****TRAIN MODEL********");
+
+        log.error("*****TRAIN MODEL********");
         for(int i = 0; i<numEpochs; i++){
             model.fit(dataIter);
         }
 
-//        log.info("******EVALUATE MODEL******");
-//
-//        recordReader.reset();
-//
-//        recordReader.initialize(test);
-//        DataSetIterator testIter = new RecordReaderDataSetIterator(recordReader,batchSize,1,outputNum);
-//        scaler.fit(testIter);
-//        testIter.setPreProcessor(scaler);
-//
-//        log.info(recordReader.getLabels().toString());
-//
-//        // Create Eval object with 10 possible classes
-//        Evaluation eval = new Evaluation(outputNum);
-//
-//        // Evaluate the network
-//        while(testIter.hasNext()){
-//            DataSet next = testIter.next();
-//            INDArray output = model.output(next.getFeatureMatrix());
-//            // Compare the Feature Matrix from the model
-//            // with the labels from the RecordReader
-//            eval.eval(next.getLabels(),output);
-//
-//        }
-//        log.info(eval.stats());
+        log.error("******EVALUATE MODEL******");
 
-        log.info("********Save model********");
-        File locationToSave = new File("trained_mnist_model.zip");
+        recordReader.reset();
 
-        // boolean save Updater
-        boolean saveUpdater = false;
+        recordReader.initialize(test);
+        DataSetIterator testIter = new RecordReaderDataSetIterator(recordReader,batchSize,1,outputNum);
+        scaler.fit(testIter);
+        testIter.setPreProcessor(scaler);
 
-        // ModelSerializer needs modelname, saveUpdater, Location
+        log.error(recordReader.getLabels().toString());
 
-        ModelSerializer.writeModel(model,locationToSave,saveUpdater);
+        // Create Eval object with 10 possible classes
+        Evaluation eval = new Evaluation(outputNum);
+
+        // Evaluate the network
+        while(testIter.hasNext()){
+            DataSet next = testIter.next();
+            INDArray output = model.output(next.getFeatureMatrix());
+            // Compare the Feature Matrix from the model
+            // with the labels from the RecordReader
+            eval.eval(next.getLabels(),output);
+
+        }
+        log.error(eval.stats());
+
+//        log.info("********Save model********");
+//        File locationToSave = new File("trained_mnist_model.zip");
+//
+//        // boolean save Updater
+//        boolean saveUpdater = false;
+//
+//        // ModelSerializer needs modelname, saveUpdater, Location
+//
+//        ModelSerializer.writeModel(model,locationToSave,saveUpdater);
 
     }
 

@@ -1,6 +1,7 @@
 package GR;
 
 
+
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.stats.StatsListener;
@@ -23,6 +24,8 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
 
 import java.io.IOException;
 
@@ -92,17 +95,17 @@ public class MNIST {
         //print the score with every 1 iteration
         model.setListeners(new ScoreIterationListener(1));
 
-        //Initialize the user interface backend
-        UIServer uiServer = UIServer.getInstance();
-
-        //Configure where the network information (gradients, score vs. time etc) is to be stored. Here: store in memory.
-        StatsStorage statsStorage = new InMemoryStatsStorage();         //Alternative: new FileStatsStorage(File), for saving and loading later
-
-        //Attach the StatsStorage instance to the UI: this allows the contents of the StatsStorage to be visualized
-        uiServer.attach(statsStorage);
-
-        //Then add the StatsListener to collect this information from the network, as it trains
-        model.setListeners(new StatsListener(statsStorage));
+//        //Initialize the user interface backend
+//        UIServer uiServer = UIServer.getInstance();
+//
+//        //Configure where the network information (gradients, score vs. time etc) is to be stored. Here: store in memory.
+//        StatsStorage statsStorage = new InMemoryStatsStorage();         //Alternative: new FileStatsStorage(File), for saving and loading later
+//
+//        //Attach the StatsStorage instance to the UI: this allows the contents of the StatsStorage to be visualized
+//        uiServer.attach(statsStorage);
+//
+//        //Then add the StatsListener to collect this information from the network, as it trains
+//        model.setListeners(new StatsListener(statsStorage));
 
         log.info("Train model....");
         for( int i=0; i<numEpochs; i++ ){
@@ -121,5 +124,6 @@ public class MNIST {
         log.info(eval.stats());
         log.info("****************Example finished********************");
 
+//        System.exit(0);
     }
 }
