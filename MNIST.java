@@ -107,13 +107,13 @@ public class MNIST {
 //        //Then add the StatsListener to collect this information from the network, as it trains
 //        model.setListeners(new StatsListener(statsStorage));
 
-        log.info("Train model....");
+        log.error("Train model....");
         for( int i=0; i<numEpochs; i++ ){
             model.fit(mnistTrain);
         }
 
 
-        log.info("Evaluate model....");
+        log.error("Evaluate model....");
         Evaluation eval = new Evaluation(outputNum); //create an evaluation object with 10 possible classes
         while(mnistTest.hasNext()){
             DataSet next = mnistTest.next();
@@ -121,8 +121,8 @@ public class MNIST {
             eval.eval(next.getLabels(), output); //check the prediction against the true class
         }
 
-        log.info(eval.stats());
-        log.info("****************Example finished********************");
+        log.error(eval.stats());
+        log.error("****************Example finished********************");
 
 //        System.exit(0);
     }

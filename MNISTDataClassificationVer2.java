@@ -73,27 +73,28 @@ public class MNISTDataClassificationVer2 {
         log.error("**********Build Model**********");
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-            .seed(rngSeed) //include a random seed for reproducibility
+            .seed(rngSeed)
             .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
             .iterations(1)
-            .learningRate(0.01)
-            .updater(Updater.NESTEROVS).momentum(0.9)
+            .learningRate(0.006)
+            .updater(Updater.NESTEROVS).momentum(0.9)   //momentum is for stop learningRate/weights from exploring or vanishing? or just keep weight descent in correct direction?
             .regularization(true).l2(1e-4)
             .list()
-        /*Building Layers*/
-            .layer(0, new DenseLayer.Builder() // input layer
+            .layer(0, new DenseLayer.Builder()
                 .nIn(height * width)
-                .nOut(1000)
+                .nOut(100)
                 .activation(Activation.RELU)
                 .weightInit(WeightInit.XAVIER)
                 .build())
-            .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                .nIn(1000)
+            .layer(1, new OutputLayer.Builder()
+                .nIn(100)
                 .nOut(outputNum)
                 .activation(Activation.SOFTMAX)
+                .lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
                 .weightInit(WeightInit.XAVIER)
                 .build())
-            .pretrain(false).backprop(true) //use backpropagation to adjust weights
+            .pretrain(false).backprop(true)
+            .setInputType(InputType.convolutional(height, width, chanel))
             .build();
 
         MultiLayerNetwork model = new MultiLayerNetwork(conf);
