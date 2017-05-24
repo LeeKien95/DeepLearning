@@ -17,6 +17,7 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -44,7 +45,7 @@ public class MNISTDataClassificationVer2 {
 //        log.warn("Hello World");
         int height = 28;
         int width = 28;
-        int chanel = 1;
+        int channel = 1;
         int rngSeed = 123;
         Random randNumGen = new Random(rngSeed);
         int batchSize = 128;
@@ -58,7 +59,7 @@ public class MNISTDataClassificationVer2 {
 
         ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
 
-        ImageRecordReader recordReader = new ImageRecordReader(height, width, chanel, labelMaker);
+        ImageRecordReader recordReader = new ImageRecordReader(height, width, channel, labelMaker);
 
         recordReader.initialize(train);
 
@@ -73,27 +74,33 @@ public class MNISTDataClassificationVer2 {
         log.error("**********Build Model**********");
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-            .seed(rngSeed) //include a random seed for reproducibility
+            .seed(rngSeed)
             .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
             .iterations(1)
-            .learningRate(0.01)
+            .learningRate(0.006)
             .updater(Updater.NESTEROVS).momentum(0.9)
             .regularization(true).l2(1e-4)
             .list()
-        /*Building Layers*/
-            .layer(0, new DenseLayer.Builder() // input layer
+            .layer(0, new DenseLayer.Builder()
                 .nIn(height * width)
                 .nOut(1000)
                 .activation(Activation.RELU)
                 .weightInit(WeightInit.XAVIER)
                 .build())
-            .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+            .layer(1, new DenseLayer.Builder()
                 .nIn(1000)
+                .nOut(800)
+                .activation(Activation.RELU)
+                .weightInit(WeightInit.XAVIER)
+                .build())
+            .layer(2, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                .nIn(800)
                 .nOut(outputNum)
                 .activation(Activation.SOFTMAX)
                 .weightInit(WeightInit.XAVIER)
                 .build())
-            .pretrain(false).backprop(true) //use backpropagation to adjust weights
+            .pretrain(false).backprop(true)
+            .setInputType(InputType.convolutional(height,width,channel))
             .build();
 
         MultiLayerNetwork model = new MultiLayerNetwork(conf);
@@ -106,40 +113,40 @@ public class MNISTDataClassificationVer2 {
             model.fit(dataIter);
         }
 
-        log.error("******EVALUATE MODEL******");
-
-        recordReader.reset();
-
-        recordReader.initialize(test);
-        DataSetIterator testIter = new RecordReaderDataSetIterator(recordReader,batchSize,1,outputNum);
-        scaler.fit(testIter);
-        testIter.setPreProcessor(scaler);
-
-        log.error(recordReader.getLabels().toString());
-
-        // Create Eval object with 10 possible classes
-        Evaluation eval = new Evaluation(outputNum);
-
-        // Evaluate the network
-        while(testIter.hasNext()){
-            DataSet next = testIter.next();
-            INDArray output = model.output(next.getFeatureMatrix());
-            // Compare the Feature Matrix from the model
-            // with the labels from the RecordReader
-            eval.eval(next.getLabels(),output);
-
-        }
-        log.error(eval.stats());
-
-//        log.info("********Save model********");
-//        File locationToSave = new File("trained_mnist_model.zip");
+//        log.error("******EVALUATE MODEL******");
 //
-//        // boolean save Updater
-//        boolean saveUpdater = false;
+//        recordReader.reset();
 //
-//        // ModelSerializer needs modelname, saveUpdater, Location
+//        recordReader.initialize(test);
+//        DataSetIterator testIter = new RecordReaderDataSetIterator(recordReader,batchSize,1,outputNum);
+//        scaler.fit(testIter);
+//        testIter.setPreProcessor(scaler);
 //
-//        ModelSerializer.writeModel(model,locationToSave,saveUpdater);
+//        log.error(recordReader.getLabels().toString());
+//
+//        // Create Eval object with 10 possible classes
+//        Evaluation eval = new Evaluation(outputNum);
+//
+//        // Evaluate the network
+//        while(testIter.hasNext()){
+//            DataSet next = testIter.next();
+//            INDArray output = model.output(next.getFeatureMatrix());
+//            // Compare the Feature Matrix from the model
+//            // with the labels from the RecordReader
+//            eval.eval(next.getLabels(),output);
+//
+//        }
+//        log.error(eval.stats());
+
+        log.error("********Save model********");
+        File locationToSave = new File("trained_mnist_model.zip");
+
+        // boolean save Updater
+        boolean saveUpdater = false;
+
+        // ModelSerializer needs modelname, saveUpdater, Location
+
+        ModelSerializer.writeModel(model,locationToSave,saveUpdater);
 
     }
 
