@@ -101,7 +101,7 @@ public class MNISTDataClassificationVer2 {
                 .weightInit(WeightInit.XAVIER)
                 .build())
             .pretrain(false).backprop(true)
-            .setInputType(InputType.convolutional(height, width, chanel))
+            .setInputType(InputType.convolutional(height, width, channel))
             .build();
 
         MultiLayerNetwork model = new MultiLayerNetwork(conf);
